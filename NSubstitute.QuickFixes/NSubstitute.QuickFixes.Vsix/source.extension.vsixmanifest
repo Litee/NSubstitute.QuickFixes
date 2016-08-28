@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Id="NSubstitute.QuickFixes.3434737b-62bd-439e-9e89-662e635cc0dc" Version="0.1.0" Language="en-US" Publisher="Andrey Lipatkin"/>
+    <DisplayName>NSubstitute.QuickFixes</DisplayName>
+    <Description xml:space="preserve">Quickfixes for NSubstitute mocking library.</Description>
+    <MoreInfo>https://github.com/Litee/NSubstitute.QuickFixes</MoreInfo>
+    <License>https://github.com/Litee/NSubstitute.QuickFixes/raw/master/LICENSE</License>
+    <Tags>nsubstitute mock testing</Tags>
+  </Metadata>
+  <Installation>
+    <InstallationTarget Version="[14.0,]" Id="Microsoft.VisualStudio.Pro" />
+  </Installation>
+  <Dependencies>
+    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
+  </Dependencies>
+  <Assets>
+    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="NSubstitute.QuickFixes" Path="|NSubstitute.QuickFixes|"/>
+    <Asset Type="Microsoft.VisualStudio.Analyzer" d:Source="Project" d:ProjectName="NSubstitute.QuickFixes" Path="|NSubstitute.QuickFixes|"/>
+  </Assets>
+</PackageManifest>
