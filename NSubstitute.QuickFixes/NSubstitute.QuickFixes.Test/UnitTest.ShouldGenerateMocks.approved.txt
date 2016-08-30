@@ -1,0 +1,26 @@
+﻿
+    using System;
+    using NSubstitute;
+
+    namespace ConsoleApplication1
+    {
+        class MyService
+        {
+            public MyService(IMyAnotherService myAnotherService) {
+            }
+        }
+
+        interface IMyAnotherService
+        {
+        }
+
+        class MyTest
+        {
+        private IMyAnotherService _myAnotherServiceMock;
+
+        MyTest() {
+            _myAnotherServiceMock = Substitute.For<IMyAnotherService>();
+            var sut = new MyService(_myAnotherServiceMock);
+            }
+        }
+    }

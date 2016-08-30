@@ -1,0 +1,27 @@
+﻿
+    using System;
+    using NSubstitute;
+
+    namespace ConsoleApplication1
+    {
+        class FirstService
+        {
+            public FirstService(ISecondService secondService, IThirdService thirdService) {
+            }
+        }
+
+        interface ISecondService { }
+
+        interface IThirdService { }
+
+        class MyTest
+        {
+            IThirdService _thirdServiceMock;
+        private ISecondService _secondServiceMock;
+
+        MyTest() {
+            _secondServiceMock = Substitute.For<ISecondService>();
+            var sut = new FirstService(_secondServiceMock, _thirdServiceMock);
+            }
+        }
+    }

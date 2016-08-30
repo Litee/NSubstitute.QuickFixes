@@ -1,4 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using ApprovalTests;
+using ApprovalTests.Reporters;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -8,6 +10,7 @@ using TestHelper;
 namespace NSubstitute.QuickFixes.Test
 {
     [TestClass]
+    [UseReporter(typeof(DiffReporter))]
     public class UnitTest : CodeFixVerifier
     {
 
@@ -35,7 +38,6 @@ namespace NSubstitute.QuickFixes.Test
             VerifyCSharpDiagnostic(test, false);
         }
 
-        //Diagnostic and CodeFix both triggered and checked for
         [TestMethod]
         public void ShouldGenerateMocks()
         {
@@ -75,33 +77,51 @@ namespace NSubstitute.QuickFixes.Test
 
             VerifyCSharpDiagnostic(test, true, expected);
 
-            var fixtest = @"
+            Approvals.Verify(VerifyCSharpFix(test, true));
+        }
+
+        [TestMethod]
+        public void ShouldNotGenerateExistingFields()
+        {
+            var test = @"
     using System;
     using NSubstitute;
 
     namespace ConsoleApplication1
     {
-        class MyService
+        class FirstService
         {
-            public MyService(IMyAnotherService myAnotherService) {
+            public FirstService(ISecondService secondService, IThirdService thirdService) {
             }
         }
 
-        interface IMyAnotherService
-        {
-        }
+        interface ISecondService { }
+
+        interface IThirdService { }
 
         class MyTest
         {
-        private IMyAnotherService _myAnotherServiceMock;
+            IThirdService _thirdServiceMock;
 
-        MyTest() {
-            _myAnotherServiceMock = Substitute.For<IMyAnotherService>();
-            var sut = new MyService(_myAnotherServiceMock);
+            MyTest() {
+                var sut = new FirstService();
             }
         }
     }";
-            VerifyCSharpFix(test, fixtest, true);
+            var expected = new DiagnosticResult
+            {
+                Id = "NSHA100",
+                Message = String.Format("Mocks can be generated"),
+                Severity = DiagnosticSeverity.Warning,
+                Locations =
+                    new[] {
+                            new DiagnosticResultLocation("Test0.cs", 22, 27)
+                        }
+            };
+
+            VerifyCSharpDiagnostic(test, true, expected);
+
+            Approvals.Verify(VerifyCSharpFix(test, true));
         }
 
         protected override CodeFixProvider GetCSharpCodeFixProvider()
