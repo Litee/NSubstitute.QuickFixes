@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using TestHelper;
-using NSubstitute.QuickFixes;
 
 namespace NSubstitute.QuickFixes.Test
 {
@@ -14,59 +13,95 @@ namespace NSubstitute.QuickFixes.Test
 
         //No diagnostics expected to show up
         [TestMethod]
-        public void TestMethod1()
+        public void ShouldSuggestNoFixesIfNoNSubstitute()
         {
-            var test = @"";
+            var test = @"
+    using System;
 
-            VerifyCSharpDiagnostic(test);
+    namespace ConsoleApplication1
+    {
+        class MyService
+        {
+        }
+
+        class MyTest
+        {
+            MyTest() {
+                var sut = new MyService();
+            }
+        }
+    }";
+
+            VerifyCSharpDiagnostic(test, false);
         }
 
         //Diagnostic and CodeFix both triggered and checked for
         [TestMethod]
-        public void TestMethod2()
+        public void ShouldGenerateMocks()
         {
             var test = @"
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Diagnostics;
+    using NSubstitute;
 
     namespace ConsoleApplication1
     {
-        class TypeName
-        {   
+        class MyService
+        {
+            public MyService(IMyAnotherService myAnotherService) {
+            }
+        }
+
+        interface IMyAnotherService
+        {
+        }
+
+        class MyTest
+        {
+            MyTest() {
+                var sut = new MyService();
+            }
         }
     }";
             var expected = new DiagnosticResult
             {
-                Id = "NSubstituteHelper",
-                Message = String.Format("Type name '{0}' contains lowercase letters", "TypeName"),
+                Id = "NSHA100",
+                Message = String.Format("Mocks can be generated"),
                 Severity = DiagnosticSeverity.Warning,
                 Locations =
                     new[] {
-                            new DiagnosticResultLocation("Test0.cs", 11, 15)
+                            new DiagnosticResultLocation("Test0.cs", 20, 27)
                         }
             };
 
-            VerifyCSharpDiagnostic(test, expected);
+            VerifyCSharpDiagnostic(test, true, expected);
 
             var fixtest = @"
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Diagnostics;
+    using NSubstitute;
 
     namespace ConsoleApplication1
     {
-        class TYPENAME
-        {   
+        class MyService
+        {
+            public MyService(IMyAnotherService myAnotherService) {
+            }
+        }
+
+        interface IMyAnotherService
+        {
+        }
+
+        class MyTest
+        {
+        private IMyAnotherService _myAnotherServiceMock;
+
+        MyTest() {
+            _myAnotherServiceMock = Substitute.For<IMyAnotherService>();
+            var sut = new MyService(_myAnotherServiceMock);
+            }
         }
     }";
-            VerifyCSharpFix(test, fixtest);
+            VerifyCSharpFix(test, fixtest, true);
         }
 
         protected override CodeFixProvider GetCSharpCodeFixProvider()

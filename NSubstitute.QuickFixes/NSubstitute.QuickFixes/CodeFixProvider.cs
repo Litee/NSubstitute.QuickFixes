@@ -53,7 +53,7 @@ namespace NSubstitute.QuickFixes
 
             var invokedSymbol = (IMethodSymbol)symbolInfo.CandidateSymbols.FirstOrDefault(x => x is IMethodSymbol);
 
-            var methodDeclaration = objectCreation.FirstAncestorOrSelf<MethodDeclarationSyntax>();
+            var methodDeclaration = objectCreation.FirstAncestorOrSelf<BaseMethodDeclarationSyntax>();
             var classDeclaration = objectCreation.FirstAncestorOrSelf<ClassDeclarationSyntax>();
 
             var editor = await DocumentEditor.CreateAsync(document).ConfigureAwait(false);
