@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Microsoft.CodeAnalysis.Editing;
 
 namespace NSubstitute.QuickFixes
@@ -58,25 +59,43 @@ namespace NSubstitute.QuickFixes
 
             var editor = await DocumentEditor.CreateAsync(document).ConfigureAwait(false);
 
-            var arguments = new List<ArgumentSyntax>();
-            foreach (var constructorParam in invokedSymbol.Parameters)
+            var arguments = new List<ArgumentSyntax>(objectCreation.ArgumentList.Arguments);
+            for (int i = objectCreation.ArgumentList.Arguments.Count(); i < invokedSymbol.Parameters.Length; i++)
             {
+                var constructorParam = invokedSymbol.Parameters[i];
+                var fieldName = "_" + constructorParam.Name + "Mock";
                 INamedTypeSymbol paramTypeSymbol = (INamedTypeSymbol)constructorParam.Type;
-                if (paramTypeSymbol.IsAbstract)
+                if (paramTypeSymbol.ConstructedFrom.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == "global::System.Func<TResult>")
                 {
-                    var fieldName = "_" + constructorParam.Name + "Mock";
                     if (!FieldExists(fieldName, classDeclaration))
                     {
-                        var fieldDeclaration = SyntaxFactory.FieldDeclaration(SyntaxFactory.VariableDeclaration(SyntaxFactory.IdentifierName(paramTypeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)))
-                            .WithVariables(SyntaxFactory.SingletonSeparatedList(SyntaxFactory.VariableDeclarator(fieldName))))
-                            .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PrivateKeyword)));
+                        var genericType = IdentifierName(paramTypeSymbol.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
+                        var fieldDeclaration = FieldDeclaration(VariableDeclaration(genericType)
+                            .WithVariables(SingletonSeparatedList(VariableDeclarator(fieldName))))
+                            .WithModifiers(TokenList(Token(SyntaxKind.PrivateKeyword)));
                         editor.InsertBefore(methodDeclaration, fieldDeclaration);
-                        var mockCreationStatement = SyntaxFactory.ExpressionStatement(SyntaxFactory.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
-                            SyntaxFactory.IdentifierName(fieldName),
-                            SyntaxFactory.InvocationExpression(SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, SyntaxFactory.IdentifierName("Substitute"), SyntaxFactory.GenericName(SyntaxFactory.Identifier("For")).WithTypeArgumentList(SyntaxFactory.TypeArgumentList(SyntaxFactory.SingletonSeparatedList<TypeSyntax>(SyntaxFactory.IdentifierName(paramTypeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)))))))));
+                        var mockCreationStatement = ExpressionStatement(AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
+                            IdentifierName(fieldName),
+                            InvocationExpression(MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, IdentifierName("Substitute"), GenericName(Identifier("For")).WithTypeArgumentList(TypeArgumentList(SingletonSeparatedList<TypeSyntax>(genericType)))))));
                         editor.InsertBefore(objectCreation.FirstAncestorOrSelf<StatementSyntax>(), mockCreationStatement);
                     }
-                    arguments.Add(SyntaxFactory.Argument(SyntaxFactory.IdentifierName(fieldName)));
+                    arguments.Add(Argument(ParenthesizedLambdaExpression(IdentifierName(fieldName))));
+                }
+                else if (paramTypeSymbol.IsAbstract)
+                {
+                    if (!FieldExists(fieldName, classDeclaration))
+                    {
+                        var genericType = IdentifierName(paramTypeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
+                        var fieldDeclaration = FieldDeclaration(VariableDeclaration(genericType)
+                            .WithVariables(SingletonSeparatedList(VariableDeclarator(fieldName))))
+                            .WithModifiers(TokenList(Token(SyntaxKind.PrivateKeyword)));
+                        editor.InsertBefore(methodDeclaration, fieldDeclaration);
+                        var mockCreationStatement = ExpressionStatement(AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
+                            IdentifierName(fieldName),
+                            InvocationExpression(MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, IdentifierName("Substitute"), GenericName(Identifier("For")).WithTypeArgumentList(TypeArgumentList(SingletonSeparatedList<TypeSyntax>(genericType)))))));
+                        editor.InsertBefore(objectCreation.FirstAncestorOrSelf<StatementSyntax>(), mockCreationStatement);
+                    }
+                    arguments.Add(Argument(IdentifierName(fieldName)));
                 }
                 else
                 {
@@ -85,11 +104,11 @@ namespace NSubstitute.QuickFixes
                         SyntaxFactory.IdentifierName(localVarName),
                         SyntaxFactory.DefaultExpression(SyntaxFactory.IdentifierName(paramTypeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)))));
                     editor.InsertBefore(objectCreation.FirstAncestorOrSelf<StatementSyntax>(), mockCreationStatement);*/
-                    arguments.Add(SyntaxFactory.Argument(SyntaxFactory.IdentifierName("TODO")));
+                    arguments.Add(Argument(IdentifierName("TODO")));
                 }
             }
 
-            var newObjectCreation = objectCreation.WithArgumentList(SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(arguments)));
+            var newObjectCreation = objectCreation.WithArgumentList(ArgumentList(SeparatedList(arguments)));
             editor.ReplaceNode(objectCreation, newObjectCreation);
 
             return editor.GetChangedDocument();

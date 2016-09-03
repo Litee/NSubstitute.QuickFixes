@@ -30,7 +30,7 @@ namespace NSubstitute.QuickFixes
         {
             var expression = context.SemanticModel.SyntaxTree.GetRoot().DescendantNodes()
                                         .OfType<ObjectCreationExpressionSyntax>()
-                                        .FirstOrDefault(x => x.ArgumentList.Arguments.Count == 0);
+                                        .FirstOrDefault();
 
             if (expression == null)
                 return;

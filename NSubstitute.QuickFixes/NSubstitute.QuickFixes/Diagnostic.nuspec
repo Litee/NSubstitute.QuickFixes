@@ -2,15 +2,16 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>NSubstitute.QuickFixes</id>
-    <version>0.1.0-beta3</version>
+    <version>0.1.0-beta4</version>
     <title>NSubstitute.QuickFixes</title>
     <authors>Andrey "Litee" Lipatkin</authors>
     <owners>Andrey "Litee" Lipatkin</owners>
     <licenseUrl>https://github.com/Litee/NSubstitute.QuickFixes/raw/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/Litee/NSubstitute.QuickFixes</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Quickfixes for NSubstitute mocking library.</description>
+    <description>Quick fixes for NSubstitute mocking library.</description>
     <releaseNotes>
+      0.1.0-beta4 Generate mocks for Func&lt;T&gt; parameters; generate mocks for new parameters in existing calls
       0.1.0-beta3 Field is not generated or configured if already defined
       0.1.0-beta2 Fixed crash when tested class was created in constructor, not in method
       0.1.0-beta1 First release

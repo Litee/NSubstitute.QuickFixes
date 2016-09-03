@@ -124,6 +124,64 @@ namespace NSubstitute.QuickFixes.Test
             Approvals.Verify(VerifyCSharpFix(test, true));
         }
 
+        [TestMethod]
+        public void ShouldGenerateMocksForFuncFactories()
+        {
+            var test = @"
+    using System;
+    using NSubstitute;
+
+    namespace ConsoleApplication1
+    {
+        class FirstService
+        {
+            public FirstService(Func<ISecondService> secondServiceFactory) {
+            }
+        }
+
+        interface ISecondService { }
+
+        class MyTest
+        {
+
+            MyTest() {
+                var sut = new FirstService();
+            }
+        }
+    }";
+            Approvals.Verify(VerifyCSharpFix(test, true));
+        }
+
+        [TestMethod]
+        public void ShouldGenerateMocksForNewParameters()
+        {
+            var test = @"
+    using System;
+    using NSubstitute;
+
+    namespace ConsoleApplication1
+    {
+        class FirstService
+        {
+            public FirstService(ISecondService secondService, IThirdService thirdService) {
+            }
+        }
+
+        interface ISecondService { }
+
+        interface IThirdService { }
+
+        class MyTest
+        {
+
+            MyTest() {
+                var sut = new FirstService(null);
+            }
+        }
+    }";
+            Approvals.Verify(VerifyCSharpFix(test, true));
+        }
+
         protected override CodeFixProvider GetCSharpCodeFixProvider()
         {
             return new NSubstituteHelperCodeFixProvider();
