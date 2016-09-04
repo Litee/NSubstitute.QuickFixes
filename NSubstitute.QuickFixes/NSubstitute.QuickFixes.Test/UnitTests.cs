@@ -1,20 +1,18 @@
-﻿using ApprovalTests;
-using ApprovalTests.Reporters;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using TestHelper;
-
-namespace NSubstitute.QuickFixes.Test
+﻿namespace NSubstitute.QuickFixes.Test
 {
+    using System;
+    using ApprovalTests;
+    using ApprovalTests.Reporters;
+    using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CodeFixes;
+    using Microsoft.CodeAnalysis.Diagnostics;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using TestHelper;
+
     [TestClass]
     [UseReporter(typeof(DiffReporter))]
-    public class UnitTest : CodeFixVerifier
+    public class UnitTests : CodeFixVerifier
     {
-
-        //No diagnostics expected to show up
         [TestMethod]
         public void ShouldSuggestNoFixesIfNoNSubstitute()
         {
@@ -67,12 +65,12 @@ namespace NSubstitute.QuickFixes.Test
             var expected = new DiagnosticResult
             {
                 Id = "NSHA100",
-                Message = String.Format("Mocks can be generated"),
+                Message = string.Format("Mocks can be generated"),
                 Severity = DiagnosticSeverity.Warning,
-                Locations =
-                    new[] {
-                            new DiagnosticResultLocation("Test0.cs", 20, 27)
-                        }
+                Locations = new[]
+                    {
+                        new DiagnosticResultLocation("Test0.cs", 20, 27)
+                    }
             };
 
             VerifyCSharpDiagnostic(test, addNSubstituteReference: true, expected: expected);
@@ -111,15 +109,15 @@ namespace NSubstitute.QuickFixes.Test
             var expected = new DiagnosticResult
             {
                 Id = "NSHA100",
-                Message = String.Format("Mocks can be generated"),
+                Message = string.Format("Mocks can be generated"),
                 Severity = DiagnosticSeverity.Warning,
-                Locations =
-                    new[] {
-                            new DiagnosticResultLocation("Test0.cs", 22, 27)
-                        }
+                Locations = new[]
+                {
+                    new DiagnosticResultLocation("Test0.cs", 22, 27)
+                }
             };
 
-            VerifyCSharpDiagnostic(test, addNSubstituteReference: true, expected:  expected);
+            VerifyCSharpDiagnostic(test, addNSubstituteReference: true, expected: expected);
 
             Approvals.Verify(VerifyCSharpFix(test, addNSubstituteReference: true));
         }

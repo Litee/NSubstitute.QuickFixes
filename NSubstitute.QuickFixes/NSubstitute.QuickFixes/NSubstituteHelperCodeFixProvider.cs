@@ -1,23 +1,24 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Composition;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.CodeActions;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using Microsoft.CodeAnalysis.Editing;
-
-namespace NSubstitute.QuickFixes
+﻿namespace NSubstitute.QuickFixes
 {
-    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(NSubstituteHelperCodeFixProvider)), Shared]
+    using System.Collections.Generic;
+    using System.Collections.Immutable;
+    using System.Composition;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CodeActions;
+    using Microsoft.CodeAnalysis.CodeFixes;
+    using Microsoft.CodeAnalysis.CSharp;
+    using Microsoft.CodeAnalysis.CSharp.Syntax;
+    using Microsoft.CodeAnalysis.Editing;
+    using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
+    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(NSubstituteHelperCodeFixProvider))]
+    [Shared]
     public class NSubstituteHelperCodeFixProvider : CodeFixProvider
     {
-        private const string title = "Generate mocks as fields";
+        private const string Title = "Generate mocks as fields";
 
         public sealed override ImmutableArray<string> FixableDiagnosticIds
         {
@@ -40,9 +41,9 @@ namespace NSubstitute.QuickFixes
 
             context.RegisterCodeFix(
                 CodeAction.Create(
-                    title: title,
+                    title: Title,
                     createChangedDocument: c => GenerateMocks(root, context.Document, declaration, c),
-                    equivalenceKey: title),
+                    equivalenceKey: Title),
                 diagnostic);
         }
 
@@ -74,7 +75,8 @@ namespace NSubstitute.QuickFixes
                             .WithVariables(SingletonSeparatedList(VariableDeclarator(fieldName))))
                             .WithModifiers(TokenList(Token(SyntaxKind.PrivateKeyword)));
                         editor.InsertBefore(methodDeclaration, fieldDeclaration);
-                        var mockCreationStatement = ExpressionStatement(AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
+                        var mockCreationStatement = ExpressionStatement(AssignmentExpression(
+                            SyntaxKind.SimpleAssignmentExpression,
                             IdentifierName(fieldName),
                             InvocationExpression(MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, IdentifierName("Substitute"), GenericName(Identifier("For")).WithTypeArgumentList(TypeArgumentList(SingletonSeparatedList<TypeSyntax>(genericType)))))));
                         editor.InsertBefore(objectCreation.FirstAncestorOrSelf<StatementSyntax>(), mockCreationStatement);
@@ -90,7 +92,8 @@ namespace NSubstitute.QuickFixes
                             .WithVariables(SingletonSeparatedList(VariableDeclarator(fieldName))))
                             .WithModifiers(TokenList(Token(SyntaxKind.PrivateKeyword)));
                         editor.InsertBefore(methodDeclaration, fieldDeclaration);
-                        var mockCreationStatement = ExpressionStatement(AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
+                        var mockCreationStatement = ExpressionStatement(AssignmentExpression(
+                            SyntaxKind.SimpleAssignmentExpression,
                             IdentifierName(fieldName),
                             InvocationExpression(MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, IdentifierName("Substitute"), GenericName(Identifier("For")).WithTypeArgumentList(TypeArgumentList(SingletonSeparatedList<TypeSyntax>(genericType)))))));
                         editor.InsertBefore(objectCreation.FirstAncestorOrSelf<StatementSyntax>(), mockCreationStatement);

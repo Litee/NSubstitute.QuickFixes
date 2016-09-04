@@ -1,43 +1,31 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis.Text;
-using NSubstitute;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-
-namespace TestHelper
+﻿namespace TestHelper
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.Immutable;
+    using System.Linq;
+    using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CSharp;
+    using Microsoft.CodeAnalysis.Diagnostics;
+    using Microsoft.CodeAnalysis.Text;
+    using NSubstitute;
+
     /// <summary>
     /// Class for turning strings into documents and getting the diagnostics on them
     /// All methods are static
     /// </summary>
     public abstract partial class DiagnosticVerifier
     {
+        private const string DefaultFilePathPrefix = "Test";
+        private const string CSharpDefaultFileExt = "cs";
+        private const string VisualBasicDefaultExt = "vb";
+        private const string TestProjectName = "TestProject";
+
         private static readonly MetadataReference CorlibReference = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
         private static readonly MetadataReference SystemCoreReference = MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);
         private static readonly MetadataReference CSharpSymbolsReference = MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
         private static readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
         private static readonly MetadataReference NSubstituteReference = MetadataReference.CreateFromFile(typeof(Substitute).Assembly.Location);
-
-        internal static string DefaultFilePathPrefix = "Test";
-        internal static string CSharpDefaultFileExt = "cs";
-        internal static string VisualBasicDefaultExt = "vb";
-        internal static string TestProjectName = "TestProject";
-
-        /// <summary>
-        /// Given classes in the form of strings, their language, and an IDiagnosticAnlayzer to apply to it, return the diagnostics found in the string after converting it to a document.
-        /// </summary>
-        /// <param name="sources">Classes in the form of strings</param>
-        /// <param name="language">The language the source classes are in</param>
-        /// <param name="analyzer">The analyzer to be run on the sources</param>
-        /// <returns>An IEnumerable of Diagnostics that surfaced in the source code, sorted by Location</returns>
-        private static Diagnostic[] GetSortedDiagnostics(string[] sources, string language, DiagnosticAnalyzer analyzer, bool addNSubstituteReference)
-        {
-            return GetSortedDiagnosticsFromDocuments(analyzer, GetDocuments(sources, language, addNSubstituteReference));
-        }
 
         /// <summary>
         /// Given an analyzer and a document to apply it to, run the analyzer and gather an array of diagnostics found in it.
@@ -86,6 +74,31 @@ namespace TestHelper
         }
 
         /// <summary>
+        /// Create a Document from a string through creating a project that contains it.
+        /// </summary>
+        /// <param name="source">Classes in the form of a string</param>
+        /// <param name="addNSubstituteReference">Send true to add reference to NSubstitute library</param>
+        /// <param name="language">The language the source code is in</param>
+        /// <returns>A Document created from the source string</returns>
+        protected static Document CreateDocument(string source, bool addNSubstituteReference, string language = LanguageNames.CSharp)
+        {
+            return CreateProject(new[] { source }, addNSubstituteReference, language).Documents.First();
+        }
+
+        /// <summary>
+        /// Given classes in the form of strings, their language, and an IDiagnosticAnlayzer to apply to it, return the diagnostics found in the string after converting it to a document.
+        /// </summary>
+        /// <param name="sources">Classes in the form of strings</param>
+        /// <param name="language">The language the source classes are in</param>
+        /// <param name="analyzer">The analyzer to be run on the sources</param>
+        /// <param name="addNSubstituteReference">Send true to add reference to NSubstitute library</param>
+        /// <returns>An IEnumerable of Diagnostics that surfaced in the source code, sorted by Location</returns>
+        private static Diagnostic[] GetSortedDiagnostics(string[] sources, string language, DiagnosticAnalyzer analyzer, bool addNSubstituteReference)
+        {
+            return GetSortedDiagnosticsFromDocuments(analyzer, GetDocuments(sources, language, addNSubstituteReference));
+        }
+
+        /// <summary>
         /// Sort diagnostics by location in source document
         /// </summary>
         /// <param name="diagnostics">The list of Diagnostics to be sorted</param>
@@ -100,6 +113,7 @@ namespace TestHelper
         /// </summary>
         /// <param name="sources">Classes in the form of strings</param>
         /// <param name="language">The language the source code is in</param>
+        /// <param name="addNSubstituteReference">Send true to add reference to NSubstitute library</param>
         /// <returns>A Tuple containing the Documents produced from the sources and their TextSpans if relevant</returns>
         private static Document[] GetDocuments(string[] sources, string language, bool addNSubstituteReference)
         {
@@ -120,20 +134,10 @@ namespace TestHelper
         }
 
         /// <summary>
-        /// Create a Document from a string through creating a project that contains it.
-        /// </summary>
-        /// <param name="source">Classes in the form of a string</param>
-        /// <param name="language">The language the source code is in</param>
-        /// <returns>A Document created from the source string</returns>
-        protected static Document CreateDocument(string source, bool addNSubstituteReference, string language = LanguageNames.CSharp)
-        {
-            return CreateProject(new[] { source }, addNSubstituteReference, language).Documents.First();
-        }
-
-        /// <summary>
         /// Create a project using the inputted strings as sources.
         /// </summary>
         /// <param name="sources">Classes in the form of strings</param>
+        /// <param name="addNSubstituteReference">Send true to add reference to NSubstitute library</param>
         /// <param name="language">The language the source code is in</param>
         /// <returns>A Project created out of the Documents created from the source strings</returns>
         private static Project CreateProject(string[] sources, bool addNSubstituteReference, string language = LanguageNames.CSharp)
@@ -168,4 +172,3 @@ namespace TestHelper
         }
     }
 }
-

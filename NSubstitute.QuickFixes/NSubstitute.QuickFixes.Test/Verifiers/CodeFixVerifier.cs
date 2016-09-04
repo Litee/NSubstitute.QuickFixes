@@ -1,15 +1,15 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeActions;
-using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis.Formatting;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-
-namespace TestHelper
+﻿namespace TestHelper
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CodeActions;
+    using Microsoft.CodeAnalysis.CodeFixes;
+    using Microsoft.CodeAnalysis.Diagnostics;
+    using Microsoft.CodeAnalysis.Formatting;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+
     /// <summary>
     /// Superclass of all Unit tests made for diagnostics with codefixes.
     /// Contains methods used to verify correctness of codefixes
@@ -38,9 +38,10 @@ namespace TestHelper
         /// Called to test a C# codefix when applied on the inputted string as a source
         /// </summary>
         /// <param name="oldSource">A class in the form of a string before the CodeFix was applied to it</param>
-        /// <param name="newSource">A class in the form of a string after the CodeFix was applied to it</param>
+        /// <param name="addNSubstituteReference">Send true to add reference to NSubstitute library</param>
         /// <param name="codeFixIndex">Index determining which codefix to apply if there are multiple</param>
         /// <param name="allowNewCompilerDiagnostics">A bool controlling whether or not the test will fail if the CodeFix introduces other warnings after being applied</param>
+        /// <returns>Document text after fix applied</returns>
         protected string VerifyCSharpFix(string oldSource, bool addNSubstituteReference, int? codeFixIndex = null, bool allowNewCompilerDiagnostics = false)
         {
             return VerifyFix(LanguageNames.CSharp, GetCSharpDiagnosticAnalyzer(), GetCSharpCodeFixProvider(), oldSource, codeFixIndex, allowNewCompilerDiagnostics, addNSubstituteReference);
@@ -50,9 +51,10 @@ namespace TestHelper
         /// Called to test a VB codefix when applied on the inputted string as a source
         /// </summary>
         /// <param name="oldSource">A class in the form of a string before the CodeFix was applied to it</param>
-        /// <param name="newSource">A class in the form of a string after the CodeFix was applied to it</param>
+        /// <param name="addNSubstituteReference">Send true to add reference to NSubstitute library</param>
         /// <param name="codeFixIndex">Index determining which codefix to apply if there are multiple</param>
         /// <param name="allowNewCompilerDiagnostics">A bool controlling whether or not the test will fail if the CodeFix introduces other warnings after being applied</param>
+        /// <returns>Document text after fix applied</returns>
         protected string VerifyBasicFix(string oldSource, bool addNSubstituteReference, int? codeFixIndex = null, bool allowNewCompilerDiagnostics = false)
         {
             return VerifyFix(LanguageNames.VisualBasic, GetBasicDiagnosticAnalyzer(), GetBasicCodeFixProvider(), oldSource, codeFixIndex, allowNewCompilerDiagnostics, addNSubstituteReference);
@@ -68,9 +70,10 @@ namespace TestHelper
         /// <param name="analyzer">The analyzer to be applied to the source code</param>
         /// <param name="codeFixProvider">The codefix to be applied to the code wherever the relevant Diagnostic is found</param>
         /// <param name="oldSource">A class in the form of a string before the CodeFix was applied to it</param>
-        /// <param name="newSource">A class in the form of a string after the CodeFix was applied to it</param>
         /// <param name="codeFixIndex">Index determining which codefix to apply if there are multiple</param>
         /// <param name="allowNewCompilerDiagnostics">A bool controlling whether or not the test will fail if the CodeFix introduces other warnings after being applied</param>
+        /// <param name="addNSubstituteReference">Send true to add reference to NSubstitute library</param>
+        /// <returns>Document text after fix applied</returns>
         private string VerifyFix(string language, DiagnosticAnalyzer analyzer, CodeFixProvider codeFixProvider, string oldSource, int? codeFixIndex, bool allowNewCompilerDiagnostics, bool addNSubstituteReference)
         {
             var document = CreateDocument(oldSource, addNSubstituteReference, language);
@@ -100,7 +103,7 @@ namespace TestHelper
 
                 var newCompilerDiagnostics = GetNewDiagnostics(compilerDiagnostics, GetCompilerDiagnostics(document));
 
-                //check if applying the code fix introduced any new compiler diagnostics
+                // check if applying the code fix introduced any new compiler diagnostics
                 if (!allowNewCompilerDiagnostics && newCompilerDiagnostics.Any())
                 {
                     // Format and get the compiler diagnostics again so that the locations make sense in the output
@@ -113,14 +116,14 @@ namespace TestHelper
                             document.GetSyntaxRootAsync().Result.ToFullString()));
                 }
 
-                //check if there are analyzer diagnostics left after the code fix
+                // check if there are analyzer diagnostics left after the code fix
                 if (!analyzerDiagnostics.Any())
                 {
                     break;
                 }
             }
 
-            //after applying all of the code fixes, compare the resulting string to the inputted one
+            // after applying all of the code fixes, compare the resulting string to the inputted one
             return GetStringFromDocument(document);
         }
     }
