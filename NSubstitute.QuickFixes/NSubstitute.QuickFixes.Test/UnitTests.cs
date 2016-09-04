@@ -35,7 +35,7 @@ namespace NSubstitute.QuickFixes.Test
         }
     }";
 
-            VerifyCSharpDiagnostic(test, false);
+            VerifyCSharpDiagnostic(test, addNSubstituteReference: false);
         }
 
         [TestMethod]
@@ -49,7 +49,7 @@ namespace NSubstitute.QuickFixes.Test
     {
         class MyService
         {
-            public MyService(IMyAnotherService myAnotherService) {
+            public MyService(IMyAnotherService myAnotherService, string s, int i) {
             }
         }
 
@@ -75,9 +75,9 @@ namespace NSubstitute.QuickFixes.Test
                         }
             };
 
-            VerifyCSharpDiagnostic(test, true, expected);
+            VerifyCSharpDiagnostic(test, addNSubstituteReference: true, expected: expected);
 
-            Approvals.Verify(VerifyCSharpFix(test, true));
+            Approvals.Verify(VerifyCSharpFix(test, addNSubstituteReference: true, allowNewCompilerDiagnostics: true));
         }
 
         [TestMethod]
@@ -119,9 +119,9 @@ namespace NSubstitute.QuickFixes.Test
                         }
             };
 
-            VerifyCSharpDiagnostic(test, true, expected);
+            VerifyCSharpDiagnostic(test, addNSubstituteReference: true, expected:  expected);
 
-            Approvals.Verify(VerifyCSharpFix(test, true));
+            Approvals.Verify(VerifyCSharpFix(test, addNSubstituteReference: true));
         }
 
         [TestMethod]
@@ -149,7 +149,7 @@ namespace NSubstitute.QuickFixes.Test
             }
         }
     }";
-            Approvals.Verify(VerifyCSharpFix(test, true));
+            Approvals.Verify(VerifyCSharpFix(test, addNSubstituteReference: true));
         }
 
         [TestMethod]
@@ -179,7 +179,71 @@ namespace NSubstitute.QuickFixes.Test
             }
         }
     }";
-            Approvals.Verify(VerifyCSharpFix(test, true));
+            Approvals.Verify(VerifyCSharpFix(test, addNSubstituteReference: true));
+        }
+
+        [TestMethod]
+        public void ShouldNotGenerateMocksIfParameterTypesMismatchButTheNumberIsTheSame()
+        {
+            var test = @"
+    using System;
+    using NSubstitute;
+
+    namespace ConsoleApplication1
+    {
+        class FirstService
+        {
+            public FirstService(ISecondService secondService) {
+            }
+        }
+
+        interface ISecondService { }
+
+        interface IThirdService { }
+
+        class MyTest
+        {
+
+            MyTest() {
+                var thirdService = Substitute.For<IThirdService>();
+                var sut = new FirstService(thirdService);
+            }
+        }
+    }";
+            VerifyCSharpDiagnostic(test, addNSubstituteReference: true);
+        }
+
+        [TestMethod]
+        public void ShouldGenerateMocksForComplexGenerics()
+        {
+            var test = @"
+    using System;
+    using System.Collections.Generic;
+    using NSubstitute;
+
+    namespace ConsoleApplication1
+    {
+        class FirstService
+        {
+            public FirstService(ISecondService<IOne<ITwo<Dictionary<string, int>>>> secondService) {
+            }
+        }
+
+        interface ISecondService<T> { }
+
+        interface IOne<T> { }
+
+        interface ITwo<T> { }
+
+        class MyTest
+        {
+
+            MyTest() {
+                var sut = new FirstService();
+            }
+        }
+    }";
+            Approvals.Verify(VerifyCSharpFix(test, addNSubstituteReference: true, allowNewCompilerDiagnostics: true)); // Allowing new errors - for some reason visibility is not resolved properly
         }
 
         protected override CodeFixProvider GetCSharpCodeFixProvider()

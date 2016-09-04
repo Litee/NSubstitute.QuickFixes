@@ -40,9 +40,12 @@ namespace NSubstitute.QuickFixes
             if (constructorSymbolInfo.CandidateReason != CandidateReason.OverloadResolutionFailure)
                 return;
 
-            var invokedSymbol = constructorSymbolInfo.CandidateSymbols.FirstOrDefault(x => x is IMethodSymbol);
+            var invokedSymbol = constructorSymbolInfo.CandidateSymbols.OfType<IMethodSymbol>().FirstOrDefault();
 
             if (invokedSymbol == null)
+                return;
+
+            if (invokedSymbol.Parameters.Length == expression.ArgumentList.Arguments.Count())
                 return;
 
             var namespaceLookup = context.SemanticModel.LookupNamespacesAndTypes(0, name: "NSubstitute").FirstOrDefault();

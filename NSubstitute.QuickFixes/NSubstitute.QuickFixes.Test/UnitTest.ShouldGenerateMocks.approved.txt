@@ -6,7 +6,7 @@
     {
         class MyService
         {
-            public MyService(IMyAnotherService myAnotherService) {
+            public MyService(IMyAnotherService myAnotherService, string s, int i) {
             }
         }
 
@@ -20,7 +20,7 @@
 
         MyTest() {
             _myAnotherServiceMock = Substitute.For<IMyAnotherService>();
-            var sut = new MyService(_myAnotherServiceMock);
+            var sut = new MyService(_myAnotherServiceMock, default(string), default(int));
             }
         }
     }

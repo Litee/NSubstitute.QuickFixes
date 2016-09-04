@@ -1,0 +1,29 @@
+﻿
+    using System;
+    using System.Collections.Generic;
+    using NSubstitute;
+
+    namespace ConsoleApplication1
+    {
+        class FirstService
+        {
+            public FirstService(ISecondService<IOne<ITwo<Dictionary<string, int>>>> secondService) {
+            }
+        }
+
+        interface ISecondService<T> { }
+
+        interface IOne<T> { }
+
+        interface ITwo<T> { }
+
+        class MyTest
+        {
+        private ISecondService<IOne<ITwo<Dictionary<string, int>>>> _secondServiceMock;
+
+        MyTest() {
+            _secondServiceMock = Substitute.For<ISecondService<IOne<ITwo<Dictionary<string, int>>>>>();
+            var sut = new FirstService(_secondServiceMock);
+            }
+        }
+    }

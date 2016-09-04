@@ -52,7 +52,7 @@ namespace NSubstitute.QuickFixes
 
             var symbolInfo = semanticModel.GetSymbolInfo(objectCreation);
 
-            var invokedSymbol = (IMethodSymbol)symbolInfo.CandidateSymbols.FirstOrDefault(x => x is IMethodSymbol);
+            var invokedSymbol = symbolInfo.CandidateSymbols.OfType<IMethodSymbol>().FirstOrDefault();
 
             var methodDeclaration = objectCreation.FirstAncestorOrSelf<BaseMethodDeclarationSyntax>();
             var classDeclaration = objectCreation.FirstAncestorOrSelf<ClassDeclarationSyntax>();
@@ -99,12 +99,8 @@ namespace NSubstitute.QuickFixes
                 }
                 else
                 {
-                    /*var localVarName = constructorParam.Name + "Mock";
-                    var mockCreationStatement = SyntaxFactory.ExpressionStatement(SyntaxFactory.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
-                        SyntaxFactory.IdentifierName(localVarName),
-                        SyntaxFactory.DefaultExpression(SyntaxFactory.IdentifierName(paramTypeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)))));
-                    editor.InsertBefore(objectCreation.FirstAncestorOrSelf<StatementSyntax>(), mockCreationStatement);*/
-                    arguments.Add(Argument(IdentifierName("TODO")));
+                    var genericType = IdentifierName(paramTypeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
+                    arguments.Add(Argument(DefaultExpression(genericType)));
                 }
             }
 

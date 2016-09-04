@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="NSubstitute.QuickFixes.3434737b-62bd-439e-9e89-662e635cc0dc" Version="0.1.0.4" Language="en-US" Publisher="Andrey Lipatkin"/>
+    <Identity Id="NSubstitute.QuickFixes.3434737b-62bd-439e-9e89-662e635cc0dc" Version="0.1.0.5" Language="en-US" Publisher="Andrey Lipatkin"/>
     <DisplayName>NSubstitute.QuickFixes</DisplayName>
     <Description xml:space="preserve">Quick fixes for NSubstitute mocking library.</Description>
     <MoreInfo>https://github.com/Litee/NSubstitute.QuickFixes</MoreInfo>
