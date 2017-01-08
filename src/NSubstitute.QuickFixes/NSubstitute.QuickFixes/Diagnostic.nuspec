@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>NSubstitute.QuickFixes</id>
-    <version>0.1.0-beta5</version>
+    <version>0.1.0</version>
     <title>NSubstitute.QuickFixes</title>
     <authors>Andrey "Litee" Lipatkin</authors>
     <owners>Andrey "Litee" Lipatkin</owners>
@@ -11,6 +11,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Quick fixes for NSubstitute mocking library.</description>
     <releaseNotes>
+      0.1.0 Downgraded some packages to fix VS problem - https://github.com/dotnet/roslyn/issues/12247
       0.1.0-beta5 Bugfixes, more unit tests
       0.1.0-beta4 Generate mocks for Func&lt;T&gt; parameters; generate mocks for new parameters in existing calls
       0.1.0-beta3 Field is not generated or configured if already defined
