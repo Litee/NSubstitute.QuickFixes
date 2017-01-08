@@ -1,7 +1,9 @@
 Simple Roslyn-based extension to speed up tests development with NSubstitute mocking library. Inspired by https://github.com/ycherkes/MockIt
 
 ## Supported features:
-* At the moment the only supported feature is mocks generation from constructors "new MyClass()". 
+* At the moment the only supported feature is mocks generation from constructors "new MyClass()":
+
+![](https://github.com/Litee/NSubstitute.QuickFixes/blob/master/media/nsubstitute-generate-mocks-as-fields.gif)
 
 ## How to use:
 * Install as Visual Studio extension
